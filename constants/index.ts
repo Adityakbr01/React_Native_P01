@@ -1,0 +1,4 @@
+export const supabaseAnonKey: string =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZWVjZ2hqaHBtcHVwYmhpamd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjg5MTg1NDgsImV4cCI6MjA0NDQ5NDU0OH0.zy7VKTskYbhOQP_iqkB5Iu906Ryy7kf99dBoVz0ghjU";
+
+export const supabaseUrl: string = "https://jpeecghjhpmpupbhijgu.supabase.co";
