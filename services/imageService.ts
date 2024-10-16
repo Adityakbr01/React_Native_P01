@@ -1,7 +1,9 @@
+import { supabaseUrl } from "@/constants";
+
 export const getUserImageSrc = (imagePath: string | undefined) => {
   if (imagePath) {
     return {
-      uri: `https://jpeecghjhpmpupbhijgu.supabase.co/storage/v1/object/public/Uploads/profile/${imagePath}`,
+      uri: `${supabaseUrl}/storage/v1/object/public/Uploads/${imagePath}`,
     };
   } else {
     return require("../assets/images/defaultUser.png");
