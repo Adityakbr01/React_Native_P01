@@ -66,17 +66,13 @@ const Profile = () => {
 
   return (
     <ScreenWrapper bg="white">
-      <UserHeader
-        user={user?.user}
-        handleLogOut={handleLogOut}
-        router={router}
-      />
+      <UserHeader user={user} handleLogOut={handleLogOut} router={router} />
     </ScreenWrapper>
   );
 };
 
 type UserHeaderProps = {
-  user: User;
+  user: User | null;
   handleLogOut: () => void;
   router: ReturnType<typeof useRouter>;
 };
@@ -86,7 +82,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({
   router,
   handleLogOut,
 }) => {
-  console.log(user.image);
+  console.log(user?.image);
   return (
     <View
       style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
