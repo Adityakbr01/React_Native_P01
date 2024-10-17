@@ -19,6 +19,7 @@ const Avatar: React.FC<AvatarProps> = ({
   rounded = theme.radius.sm,
   style = {},
 }) => {
+  console.log(getUserImageSrc(uri));
   return (
     <Image
       source={getUserImageSrc(uri)} // Ensure getUserImageSrc can handle undefined

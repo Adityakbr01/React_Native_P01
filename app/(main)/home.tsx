@@ -22,7 +22,7 @@ const Home = () => {
       alert("Sign Out Failed!");
     }
   };
-
+  console.log("hello", user?.image);
   return (
     <ScreenWrapper bg="white">
       <View style={styles.container}>
