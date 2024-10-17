@@ -1,7 +1,10 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { supabase } from "@/lib/supabase";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+=======
+>>>>>>> 446f976cf95532d4d67dd3bfec1972b561b8a6df
 =======
 >>>>>>> 446f976cf95532d4d67dd3bfec1972b561b8a6df
 import { supabaseUrl } from "@/constants";
@@ -9,7 +12,13 @@ import { supabaseUrl } from "@/constants";
 export const getUserImageSrc = (imagePath: string | undefined) => {
   if (imagePath) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     return getSupabaseImageSrc(imagePath);
+=======
+    return {
+      uri: `${supabaseUrl}/storage/v1/object/public/Uploads/${imagePath}`,
+    };
+>>>>>>> 446f976cf95532d4d67dd3bfec1972b561b8a6df
 =======
     return {
       uri: `${supabaseUrl}/storage/v1/object/public/Uploads/${imagePath}`,
