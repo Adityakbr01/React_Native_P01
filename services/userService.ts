@@ -34,3 +34,24 @@ export const getUserData = async (
     return { successs: false, msg: (error as Error).message }; // Ensure proper error typing
   }
 };
+// Update user data
+export const updateUserData = async (
+  userId: string,
+  updatedUserData: Partial<UserData>
+): Promise<ApiResponse<UserData>> => {
+  try {
+    const { error } = await supabase
+      .from("users")
+      .update(updatedUserData)
+      .eq("id", userId);
+
+    if (error) {
+      return { successs: false, msg: error.message };
+    }
+
+    return { successs: true, data: updatedUserData };
+  } catch (error) {
+    console.log("Error updating user data:", error);
+    return { successs: false, msg: (error as Error).message };
+  }
+};

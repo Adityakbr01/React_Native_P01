@@ -6,10 +6,7 @@ import { hp } from "@/helpers/common";
 const Inpute = (props: any) => {
   return (
     <View
-      style={[
-        styles.container,
-        props.containerStyles && props.containerStyless,
-      ]}
+      style={[styles.container, props.containerStyles && props.containerStyles]}
     >
       {props.icon && props.icon}
       <TextInput
