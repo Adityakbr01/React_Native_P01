@@ -67,8 +67,6 @@ export const uploadFile = async (
       return { success: false, msg: "Could not upload media" };
     }
 
-    // console.log("File uploaded successfully:", data);
-    console.log("File uploaded successfully:", data);
     return { success: true, data: data?.path };
   } catch (error) {
     console.error("File upload error:", error);
