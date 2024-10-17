@@ -82,15 +82,8 @@ const UserHeader: React.FC<UserHeaderProps> = ({
   router,
   handleLogOut,
 }) => {
-<<<<<<< HEAD
-<<<<<<< HEAD
   // console.log(user?.name, user);
-=======
-  console.log(user?.image);
->>>>>>> 446f976cf95532d4d67dd3bfec1972b561b8a6df
-=======
-  console.log(user?.image);
->>>>>>> 446f976cf95532d4d67dd3bfec1972b561b8a6df
+
   return (
     <View
       style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}

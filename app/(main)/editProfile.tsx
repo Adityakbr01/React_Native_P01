@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     height: wp(34),
     width: wp(34),
     position: "relative",
-    backgroundColor: "blue",
+    // backgroundColor: "blue",
   },
   avatar: {
     width: "100%",
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(18),
     borderWidth: 1,
     borderColor: theme.colors.darklight,
-    backgroundColor: "red",
+    // backgroundColor: "red",
   },
   cameraIcons: {
     position: "absolute",
