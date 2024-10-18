@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
@@ -9,7 +9,10 @@ import { theme } from "@/constants/theme";
 import Icon from "../../assets/icons";
 import { useRouter } from "expo-router";
 import Avatar from "@/components/Avatar";
+import { fetchPost } from "@/services/postService";
+import PostCard from "@/components/PostCard";
 
+var limit = 0
 const Home = () => {
   const { setAuth, user } = useAuth();
   const router = useRouter();
@@ -22,13 +25,32 @@ const Home = () => {
       alert("Sign Out Failed!");
     }
   };
-  console.log("hello", user?.image);
+  //posts
+  const [posts, setPosts] = useState<any>([])
+
+//call get posts
+useEffect(() => {
+  getPosts()
+}, [])
+
+
+const getPosts = async ()=>{
+  //get posts from supabase
+limit += 10
+let result = await fetchPost(limit)
+ if(result.success){
+  setPosts(result.data)
+ }
+
+}
+
+
   return (
     <ScreenWrapper bg="white">
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>LinkUp</Text>
+          <Text style={styles.title}>PlusIG</Text>
           <View style={styles.icons}>
             <Pressable onPress={() => router.push("/notifications")}>
               <Icon
@@ -56,6 +78,21 @@ const Home = () => {
             </Pressable>
           </View>
         </View>
+
+        {/* Posts */}
+        <FlatList
+        data={posts}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listStyle}
+        keyExtractor={(item)=>item.id.toString()}
+        renderItem={({item})=>{
+          return(
+            <View>
+              <PostCard post={item}  currentUser={user} router={router}/>
+            </View>
+          )
+        }}
+        />
       </View>
 
       {/* <Button title="LogOut" onPress={LogOutHandler} /> */}
@@ -80,6 +117,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: hp(3.2),
     fontWeight: theme.Fonts.bold as any,
+  fontFamily: 'Helvetica',
   },
   avataImage: {
     height: hp(4.3),

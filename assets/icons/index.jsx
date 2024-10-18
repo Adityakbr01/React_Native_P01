@@ -22,8 +22,11 @@ import Delete from './Delete';
 import Logout from './logout';
 import Image from './Image';
 import Video from './Video';
-
+import Mute from './mute';
+import Unmute from './unmute';
 const icons = {
+    mute: Mute,
+    unmute: Unmute,
     home: Home,
     mail: Mail,
     lock: Lock,
