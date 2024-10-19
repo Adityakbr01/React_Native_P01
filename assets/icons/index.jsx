@@ -24,9 +24,11 @@ import Image from './Image';
 import Video from './Video';
 import Mute from './mute';
 import Unmute from './unmute';
+import FilledHeart from './filledHeart';
 const icons = {
     mute: Mute,
     unmute: Unmute,
+    filledHeart: FilledHeart,
     home: Home,
     mail: Mail,
     lock: Lock,

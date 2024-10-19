@@ -11,11 +11,21 @@ import { useRouter } from "expo-router";
 import Avatar from "@/components/Avatar";
 import { fetchPost } from "@/services/postService";
 import PostCard from "@/components/PostCard";
+import Loading from "@/components/Loading";
+import { getUserData } from "@/services/userService";
 
-var limit = 0
+interface Post {
+  id: string;
+  userId: string;
+  user: any;
+  // Add other properties as needed
+}
+
+let limit = 0;
 const Home = () => {
   const { setAuth, user } = useAuth();
   const router = useRouter();
+  const [hasMore, setHasMore] = useState(true);
 
   const LogOutHandler = async () => {
     setAuth(null);
@@ -26,24 +36,43 @@ const Home = () => {
     }
   };
   //posts
-  const [posts, setPosts] = useState<any>([])
+  const [posts, setPosts] = useState<Post[]>([]);
 
-//call get posts
-useEffect(() => {
-  getPosts()
-}, [])
+  const handlePostEvent = async (payload: any) => {
+    if (payload.eventType === "INSERT" && payload?.new?.id) {
+      let newPost: Post = { ...payload.new };
+      let res = await getUserData(newPost?.userId);
+      newPost.user = res.successs ? res.data : {};
+      setPosts((prevPosts) => [newPost, ...prevPosts]);
+    }
+  };
 
+  //call get posts
+  useEffect(() => {
+    let postChannel = supabase
+      .channel('post')
+      .on('postgres_changes', { event: "*", schema: "public", table: "posts" }, handlePostEvent)
+      .subscribe();
 
-const getPosts = async ()=>{
-  //get posts from supabase
-limit += 10
-let result = await fetchPost(limit)
- if(result.success){
-  setPosts(result.data)
- }
+    // getPosts();
+    return () => {
+      supabase.removeChannel(postChannel);
+    };
+  }, []);
 
-}
-
+  const getPosts = async () => {
+    //get posts from supabase
+    if(!hasMore) return null;
+    limit = limit + 3;
+    console.log("limit", limit);
+    let result = await fetchPost(limit);
+    if (result.success) {
+      if(posts.length===result?.data?.length){
+        setHasMore(false);
+      }
+      setPosts(result?.data || []);
+    }
+  };
 
   return (
     <ScreenWrapper bg="white">
@@ -81,18 +110,31 @@ let result = await fetchPost(limit)
 
         {/* Posts */}
         <FlatList
-        data={posts}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listStyle}
-        keyExtractor={(item)=>item.id.toString()}
-        renderItem={({item})=>{
-          return(
+          data={posts}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listStyle}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
             <View>
-              <PostCard post={item}  currentUser={user} router={router}/>
+              <PostCard post={item} currentUser={user} router={router} />
             </View>
-          )
-        }}
+          )}
+          onEndReached={()=>{
+            getPosts();
+            console.log("onEndReached")
+          }}
+          onEndReachedThreshold={0}
+          ListFooterComponent={hasMore ? (
+            <View style={{ marginVertical: posts.length < 0 ? 200 : 30 }}>
+              <Loading />
+            </View>
+          ) : (
+            <View style={{ marginVertical: 30 }}>
+              <Text style={styles.noPost}>No more posts</Text>
+            </View>
+          )}
         />
+
       </View>
 
       {/* <Button title="LogOut" onPress={LogOutHandler} /> */}
@@ -117,7 +159,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: hp(3.2),
     fontWeight: theme.Fonts.bold as any,
-  fontFamily: 'Helvetica',
+    
   },
   avataImage: {
     height: hp(4.3),
@@ -127,7 +169,6 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.gray,
     borderWidth: 3,
   },
-
   icons: {
     flexDirection: "row",
     justifyContent: "center",
