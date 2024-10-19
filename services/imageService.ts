@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
-
+import * as Sharing from 'expo-sharing';
 import { supabaseUrl } from "@/constants";
 
 export const getUserImageSrc = (imagePath: string | undefined) => {
@@ -35,6 +35,29 @@ interface UploadResult {
   data?: string;
   msg?: string;
 }
+
+
+
+//downloadFile
+export const downloadFile = async (filePath: string) => {
+  try {
+    let { uri } = await FileSystem.downloadAsync(filePath, getLocalFilePath(filePath));
+    console.log("uri ImageService", uri);
+    return uri;
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    return null; // Return null if there's an error during download
+  }
+};
+
+//getLocalFilePath
+export const getLocalFilePath = (filePath: string) => {
+  if (!filePath) {
+    throw new Error("Invalid file path");
+  }
+  let fileName = filePath.split("/").pop();
+  return `${FileSystem.documentDirectory}${fileName}`;
+};
 
 export const uploadFile = async (
   folderName: string,

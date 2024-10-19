@@ -1,16 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { theme } from "@/constants/theme";
 import Avatar from "./Avatar";
-import { hp, wp } from "@/helpers/common";
+import { hp, stripHtmplTags, wp } from "@/helpers/common";
 import moment from "moment";
 import Icon from "@/assets/icons";
 import RenderHtml from "react-native-render-html";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import { Image } from "expo-image";
-import { getSupabaseImageSrc } from "@/services/imageService";
+import { downloadFile, getSupabaseImageSrc } from "@/services/imageService";
 import { ResizeMode, Video } from "expo-av";
 import { createPostLike, removePostLike } from "@/services/postService";
+import * as Sharing from 'expo-sharing';
 
 const TextStyle = {
   color: theme.colors.dark,
@@ -29,6 +30,7 @@ const tagStyles = {
 };
 const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
   const [isMuted, setIsMuted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const shadowStyle = {
     shadowOffset: {
       width: 0,
@@ -76,6 +78,47 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
 
 
     
+  };
+  ///Share
+   const onShareHandler = async () => {
+    try {
+      // Initialize content with the message
+      setIsLoading(true);
+      let content: { message?: string; url?: string } = { message: stripHtmplTags(post?.body) };
+  
+      // Check if the post has a file
+      if (post?.file) {
+        // Get the file's URL from Supabase
+        const supabaseUrl = getSupabaseImageSrc(post?.file)?.uri;
+  
+        console.log("Supabase URL:", supabaseUrl); // Log the Supabase URL
+  
+        // Download the file using the URL
+        const downloadedFileUri = await downloadFile(supabaseUrl as string);
+        
+        // Check if the file was successfully downloaded
+        if (downloadedFileUri) {
+          console.log("Downloaded File URI:", downloadedFileUri);
+  
+          // Add the downloaded file URI to the content object
+          content.url = downloadedFileUri;
+          setIsLoading(false);
+        } else {
+          console.error("File download failed.");
+        }
+      }
+  
+      // Ensure there's something to share (either the file URL or message)
+      if (content.url) {
+        await Sharing.shareAsync(content.url, { dialogTitle: "Share Post" });
+      } else if (content.message) {
+        await Sharing.shareAsync(content.message, { dialogTitle: "Share Post" });
+      } else {
+        console.error("No content available to share.");
+      }
+    } catch (error) {
+      console.error("Error during sharing process:", error);
+    }
   };
 
   return (
@@ -173,12 +216,8 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
           <Text style={styles.likeCount}>{likesCount.length}</Text>
         </View>
         <View style={styles.footerButton}>
-          <TouchableOpacity>
-            <Icon
-              name={"share"}
-              size={hp(3.7)}
-              color={"black"}
-            />
+          <TouchableOpacity onPress={onShareHandler}>
+            {isLoading ? <ActivityIndicator size="small" color="black" /> : <Icon name="share" size={hp(3.7)} color="black" />}
           </TouchableOpacity>
           
         </View>

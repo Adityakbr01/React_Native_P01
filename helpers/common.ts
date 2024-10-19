@@ -13,3 +13,7 @@ export const wp = (percentage: number): number => {
 // export const isIphoneX = (): boolean => {
 //   return deviceHeight === 812 || deviceWidth === 812;
 // };
+
+export const stripHtmplTags = (Html: any) => {
+  return Html.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ");
+};
