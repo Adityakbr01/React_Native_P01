@@ -34,28 +34,65 @@ export const createPostORupdatePost = async (post: any) => {
 };
 export const fetchPost = async (limit: number = 10) => {
   try {
-
-    const {data,error} = await supabase
-    .from("posts")
-    .select(`
+    const { data, error } = await supabase
+      .from("posts")
+      .select(
+        `
     *,
     user:users(
       id,
       name,
       image
-    )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(limit)
+    ),
+    postLikes (*)
+    `
+      )
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-    if(error){
-      console.log("Fetch Post Error",error)
-      return {success:false,msg:"Could not fetch post"}
+    if (error) {
+      console.log("Fetch Post Error", error);
+      return { success: false, msg: "Could not fetch post" };
     }
-    return {success:true,data}
-
+    return { success: true, data };
   } catch (error) {
     console.log("Fetch Post Error", error);
     return { success: false, msg: "Could not fetch post Catch" };
+  }
+};
+export const createPostLike = async (postLike: any) => {
+  try {
+    const { data, error } = await supabase
+      .from("postLikes")
+      .insert(postLike)
+      .select()
+      .single();
+
+    if (error) {
+      console.log("Fetch PostLike Error", error);
+      return { success: false, msg: "Could not Like the Post" };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.log("Fetch PostLike Error", error);
+    return { success: false, msg: "Could not Like the Post" };
+  }
+};
+export const removePostLike = async (postId: string, userId: string) => {
+  try {
+    const { error } = await supabase
+      .from("postLikes")
+      .delete()
+      .eq("userId", userId)
+      .eq("postId", postId);
+
+    if (error) {
+      console.log("Fetch PostLike Error", error);
+      return { success: false, msg: "Could not remove Post Like" };
+    }
+    return { success: true };
+  } catch (error) {
+    console.log("Fetch PostLike Error", error);
+    return { success: false, msg: "Could not remove Post Like" };
   }
 };
