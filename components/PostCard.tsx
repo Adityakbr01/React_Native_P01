@@ -53,7 +53,6 @@ const PostCard = ({
     elevation: 1,
   };
   const postTime = moment(post?.created_at).format("MMM D");
-  const likesCount = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const [likeCount, setLikeCount] = useState<{ postId: any; userId: any }[]>(
     []
   );
@@ -141,7 +140,7 @@ const PostCard = ({
       console.error("Error during sharing process:", error);
     }
   };
-  console.log(post?.comments);
+  
   return (
     <View style={[styles.container, hasShadow && shadowStyle]}>
       <View style={styles.header}>

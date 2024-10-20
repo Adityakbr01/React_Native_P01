@@ -167,3 +167,22 @@ export const removePostComment = async (commentId: string) => {
     return { success: false, msg: "Could not remove Post comment" };
   }
 };
+
+
+// services/commentService.ts
+export const fetchComments = async (postId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('postId', postId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, data };
+  } catch (error) {
+    console.log("Error fetching comments: ", error);
+    return { success: false, data: [] };
+  }
+};

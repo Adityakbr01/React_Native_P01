@@ -23,18 +23,9 @@ interface Post {
 
 let limit = 0;
 const Home = () => {
-  const { setAuth, user } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [hasMore, setHasMore] = useState(true);
-
-  const LogOutHandler = async () => {
-    setAuth(null);
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      alert("Sign Out Failed!");
-    }
-  };
   //posts
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -64,7 +55,6 @@ const Home = () => {
     //get posts from supabase
     if(!hasMore) return null;
     limit = limit + 3;
-    console.log("limit", limit);
     let result = await fetchPost(limit);
     if (result.success) {
       if(posts.length===result?.data?.length){
@@ -121,7 +111,7 @@ const Home = () => {
           )}
           onEndReached={()=>{
             getPosts();
-            console.log("onEndReached")
+          
           }}
           onEndReachedThreshold={0}
           ListFooterComponent={hasMore ? (

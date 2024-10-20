@@ -18,18 +18,23 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
-  View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
+  View
 } from "react-native";
+
+type PostType = {
+  comments: any[];
+  userid: string; 
+  
+};
 
 const postDetails = () => {
   const { postId } = useLocalSearchParams();
   const { user } = useAuth();
   const router = useRouter();
   const [startLoading, setStartLoading] = useState(true);
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState<PostType | null>(null);
   const InputRef = useRef<any>(null);
   const commentRef = useRef<string>("");
   const [loading, setLoading] = useState(false);
@@ -42,10 +47,12 @@ const postDetails = () => {
       let res = await getUserData(newComment?.userId)
       newComment.user = res.successs ? res.data : {}
       setPost((prevPost) => {
-        return {
-          ...prevPost,
-          comments: [newComment, ...prevPost?.comments]
-        }
+        const updatedPost = {
+          ...(prevPost || {}),
+          userid: prevPost?.userid || "", // Ensure userid is always a string
+          comments: [newComment, ...(prevPost?.comments || [])] // Provide default empty array
+        };
+        return updatedPost;
       })
     }
     
@@ -107,11 +114,11 @@ const postDetails = () => {
     let res = await removePostComment(item?.id);
     if (res.success) {
       setPost((prePost) => {
-        let UpadatedPost = { ...prePost };
-        UpadatedPost.comments = UpadatedPost?.comments?.filter(
+        let updatedPost = { ...prePost };
+        updatedPost.comments = updatedPost.comments?.filter(
           (comment: any) => comment?.id !== item?.id
-        );
-        return UpadatedPost;
+        ) || []; // Ensure comments is always an array
+        return updatedPost as PostType; // Cast to PostType
       });
     } else {
       alert(res.msg);
