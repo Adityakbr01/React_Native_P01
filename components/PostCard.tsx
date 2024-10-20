@@ -1,4 +1,10 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { theme } from "@/constants/theme";
 import Avatar from "./Avatar";
@@ -11,7 +17,7 @@ import { Image } from "expo-image";
 import { downloadFile, getSupabaseImageSrc } from "@/services/imageService";
 import { ResizeMode, Video } from "expo-av";
 import { createPostLike, removePostLike } from "@/services/postService";
-import * as Sharing from 'expo-sharing';
+import * as Sharing from "expo-sharing";
 
 const TextStyle = {
   color: theme.colors.dark,
@@ -28,7 +34,13 @@ const tagStyles = {
     color: theme.colors.dark,
   },
 };
-const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
+const PostCard = ({
+  post,
+  currentUser,
+  router,
+  hasShadow = true,
+  showMoreIcon = true,
+}: any) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const shadowStyle = {
@@ -42,27 +54,35 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
   };
   const postTime = moment(post?.created_at).format("MMM D");
   const likesCount = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  const [likeCount, setLikeCount] = useState<{ postId: any; userId: any }[]>([]);
-  let Likes = likeCount.filter((item: any) => item?.userId === currentUser.id)[0] ? true : false;
+  const [likeCount, setLikeCount] = useState<{ postId: any; userId: any }[]>(
+    []
+  );
+  let Likes = likeCount.filter(
+    (item: any) => item?.userId === currentUser.id
+  )[0]
+    ? true
+    : false;
 
-  useEffect(() => { 
+  useEffect(() => {
     setLikeCount(post?.postLikes);
   }, []);
   const openPostDetails = () => {
-    router.push(`/post/${post.id}`);
+    if (!showMoreIcon) return null;
+    router.push(`/postDetails?postId=${post.id}`);
   };
   ///Likes
   const onLike = async () => {
-    
     if (Likes) {
       //remove like
-      let updatedLikeCount = likeCount.filter((item: any) => item?.userId !== currentUser.id);
+      let updatedLikeCount = likeCount.filter(
+        (item: any) => item?.userId !== currentUser.id
+      );
       setLikeCount([...updatedLikeCount]);
       let res = await removePostLike(post?.id, currentUser?.id);
       if (res?.success) {
         console.log("Post Unliked");
       }
-    }else{
+    } else {
       let data = {
         postId: post.id,
         userId: currentUser.id,
@@ -75,31 +95,30 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
         alert("Post Like : Something went wrong");
       }
     }
-
-
-    
   };
   ///Share
-   const onShareHandler = async () => {
+  const onShareHandler = async () => {
     try {
       // Initialize content with the message
       setIsLoading(true);
-      let content: { message?: string; url?: string } = { message: stripHtmplTags(post?.body) };
-  
+      let content: { message?: string; url?: string } = {
+        message: stripHtmplTags(post?.body),
+      };
+
       // Check if the post has a file
       if (post?.file) {
         // Get the file's URL from Supabase
         const supabaseUrl = getSupabaseImageSrc(post?.file)?.uri;
-  
+
         console.log("Supabase URL:", supabaseUrl); // Log the Supabase URL
-  
+
         // Download the file using the URL
         const downloadedFileUri = await downloadFile(supabaseUrl as string);
-        
+
         // Check if the file was successfully downloaded
         if (downloadedFileUri) {
           console.log("Downloaded File URI:", downloadedFileUri);
-  
+
           // Add the downloaded file URI to the content object
           content.url = downloadedFileUri;
           setIsLoading(false);
@@ -107,12 +126,14 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
           console.error("File download failed.");
         }
       }
-  
+
       // Ensure there's something to share (either the file URL or message)
       if (content.url) {
         await Sharing.shareAsync(content.url, { dialogTitle: "Share Post" });
       } else if (content.message) {
-        await Sharing.shareAsync(content.message, { dialogTitle: "Share Post" });
+        await Sharing.shareAsync(content.message, {
+          dialogTitle: "Share Post",
+        });
       } else {
         console.error("No content available to share.");
       }
@@ -120,7 +141,7 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
       console.error("Error during sharing process:", error);
     }
   };
-
+  console.log(post?.comments);
   return (
     <View style={[styles.container, hasShadow && shadowStyle]}>
       <View style={styles.header}>
@@ -136,14 +157,16 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
             <Text style={styles.postTime}>{postTime}</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={openPostDetails}>
-          <Icon
-            name="threeDotsHorizontal"
-            size={hp(3.5)}
-            strokeWidth={3}
-            color="black"
-          />
-        </TouchableOpacity>
+        {showMoreIcon && (
+          <TouchableOpacity onPress={openPostDetails}>
+            <Icon
+              name="threeDotsHorizontal"
+              size={hp(3.5)}
+              strokeWidth={3}
+              color="black"
+            />
+          </TouchableOpacity>
+        )}
       </View>
       {/* Post Body & media */}
       <View style={styles.content}>
@@ -204,22 +227,19 @@ const PostCard = ({ post, currentUser, router, hasShadow = true }: any) => {
           <Text style={styles.likeCount}>{likeCount.length}</Text>
         </View>
         <View style={styles.footerButton}>
-          <TouchableOpacity>
-            <Icon
-              name={"comment"}
-              size={hp(3.7)}
-              color={
-                "black"
-              }
-            />
+          <TouchableOpacity onPress={openPostDetails}>
+            <Icon name={"comment"} size={hp(3.7)} color={"black"} />
           </TouchableOpacity>
-          <Text style={styles.likeCount}>{likesCount.length}</Text>
+          <Text style={styles.likeCount}>{post?.comments[0]?.count}</Text>
         </View>
         <View style={styles.footerButton}>
           <TouchableOpacity onPress={onShareHandler}>
-            {isLoading ? <ActivityIndicator size="small" color="black" /> : <Icon name="share" size={hp(3.7)} color="black" />}
+            {isLoading ? (
+              <ActivityIndicator size="small" color="black" />
+            ) : (
+              <Icon name="share" size={hp(3.7)} color="black" />
+            )}
           </TouchableOpacity>
-          
         </View>
       </View>
     </View>

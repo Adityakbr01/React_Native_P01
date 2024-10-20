@@ -10,17 +10,19 @@ interface HeaderProps {
   title?: string; // Title is optional
   showBackButton?: boolean; // Show back button is optional
   mb?: number; // Margin bottom is optional
+  ml?:number
 }
 
 const Header: React.FC<HeaderProps> = ({
   title,
   showBackButton = true,
   mb = 10,
+  ml = 0,
 }) => {
   const router = useRouter();
 
   return (
-    <View style={[styles.container, { marginBottom: mb }]}>
+    <View style={[styles.container, { marginBottom: mb,marginLeft:ml }]}>
       {showBackButton && (
         <View style={styles.BackButton}>
           <Backbutton router={router} />
