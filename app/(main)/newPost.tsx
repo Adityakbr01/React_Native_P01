@@ -85,7 +85,7 @@ const NewPost = () => {
   }, [bodyRef.current]);
 
   const onPost = async () => {
-    if (!bodyContent || !file) {
+    if (!bodyContent && !file) {
       alert("Please add some content to your post");
       return;
     }

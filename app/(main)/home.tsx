@@ -21,48 +21,55 @@ interface Post {
   // Add other properties as needed
 }
 
-let limit = 0;
 const Home = () => {
   const { user } = useAuth();
   const router = useRouter();
   const [hasMore, setHasMore] = useState(true);
-  //posts
+  const [limit, setLimit] = useState(3); // Keep limit in state
   const [posts, setPosts] = useState<Post[]>([]);
 
   const handlePostEvent = async (payload: any) => {
-    if (payload.eventType === "INSERT" && payload?.new?.id) {
-      let newPost: Post = { ...payload.new };
+    if (payload?.eventType === "INSERT" && payload?.new?.id) {
+      let newPost: Post = { ...payload?.new };
+      console.log("NEW POST", newPost);
       let res = await getUserData(newPost?.userId);
-      newPost.user = res.successs ? res.data : {};
+      if (res?.successs) {
+        newPost.user = res?.data;
+      } else {
+        newPost.user = {}; // Handle case where user data can't be fetched
+      }
       setPosts((prevPosts) => [newPost, ...prevPosts]);
     }
   };
 
-  //call get posts
   useEffect(() => {
     let postChannel = supabase
-      .channel('post')
-      .on('postgres_changes', { event: "*", schema: "public", table: "posts" }, handlePostEvent)
+      .channel("posts")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, handlePostEvent)
       .subscribe();
 
-    // getPosts();
+    getPosts(); // Ensure posts are fetched when the component mounts
+
     return () => {
-      supabase.removeChannel(postChannel);
+      supabase.removeChannel(postChannel); // Cleanup on unmount
     };
   }, []);
 
   const getPosts = async () => {
-    //get posts from supabase
-    if(!hasMore) return null;
-    limit = limit + 3;
-    let result = await fetchPost(limit);
-    if (result.success) {
-      if(posts.length===result?.data?.length){
-        setHasMore(false);
+    if (!hasMore) return null;
+
+    let result = await fetchPost(limit); // Fetch with current limit
+    if (result?.success && result?.data) {
+      if (posts.length === result?.data.length) {
+        setHasMore(false); // No more posts available
+      } else {
+        setPosts(result?.data);
+        setLimit(limit + 3); // Increase the limit for the next fetch
       }
-      setPosts(result?.data || []);
     }
   };
+
+  console.log("POSTS", posts);
 
   return (
     <ScreenWrapper bg="white">
@@ -72,24 +79,14 @@ const Home = () => {
           <Text style={styles.title}>PlusIG</Text>
           <View style={styles.icons}>
             <Pressable onPress={() => router.push("/notifications")}>
-              <Icon
-                name="heart"
-                size={hp(3.2)}
-                color={"#000000"}
-                strokeWidth={2}
-              />
+              <Icon name="heart" size={hp(3.2)} color={"#000000"} strokeWidth={2} />
             </Pressable>
             <Pressable onPress={() => router.push("/newPost")}>
-              <Icon
-                name="plus"
-                size={hp(3.2)}
-                color={"#000000"}
-                strokeWidth={2}
-              />
+              <Icon name="plus" size={hp(3.2)} color={"#000000"} strokeWidth={2} />
             </Pressable>
             <Pressable onPress={() => router.push("/profile")}>
               <Avatar
-                uri={user?.image}
+                uri={user?.image} // Option chaining applied here
                 size={hp(4.3)}
                 rounded={theme.radius.sm}
                 style={{ borderWidth: 2 }}
@@ -103,17 +100,14 @@ const Home = () => {
           data={posts}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listStyle}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item?.id} // Option chaining applied here
           renderItem={({ item }) => (
             <View>
               <PostCard post={item} currentUser={user} router={router} />
             </View>
           )}
-          onEndReached={()=>{
-            getPosts();
-          
-          }}
-          onEndReachedThreshold={0}
+          onEndReached={getPosts}
+          onEndReachedThreshold={0.5}
           ListFooterComponent={hasMore ? (
             <View style={{ marginVertical: posts.length < 0 ? 200 : 30 }}>
               <Loading />
@@ -124,10 +118,7 @@ const Home = () => {
             </View>
           )}
         />
-
       </View>
-
-      {/* <Button title="LogOut" onPress={LogOutHandler} /> */}
     </ScreenWrapper>
   );
 };
@@ -149,13 +140,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: hp(3.2),
     fontWeight: theme.Fonts.bold as any,
-    
   },
   avataImage: {
     height: hp(4.3),
     width: hp(4.3),
     borderRadius: theme.radius.sm,
-    borderCurve: "circular",
     borderColor: theme.colors.gray,
     borderWidth: 3,
   },
@@ -175,5 +164,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: theme.Fonts.bold as any,
   },
-  pill: {},
 });
