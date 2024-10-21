@@ -80,12 +80,12 @@ const NewPost = () => {
 
   useEffect(() => {
     if (bodyRef.current) {
-      console.log("NEW POST", bodyRef.current.getContentHtml());
+      
     }
   }, [bodyRef.current]);
 
   const onPost = async () => {
-    if (!bodyContent && !file) {
+    if (!bodyContent || !file) {
       alert("Please add some content to your post");
       return;
     }
@@ -98,7 +98,6 @@ const NewPost = () => {
     let res = await createPostORupdatePost(data);
     if (res?.success) {
       setLoading(false);
-      console.log("Post Res", res);
       router.back();
     } else {
       setLoading(false);

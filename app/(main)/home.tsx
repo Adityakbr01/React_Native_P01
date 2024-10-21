@@ -18,7 +18,6 @@ interface Post {
   id: string;
   userId: string;
   user: any;
-  // Add other properties as needed
 }
 
 const Home = () => {
@@ -36,7 +35,7 @@ const Home = () => {
       if (res?.successs) {
         newPost.user = res?.data;
       } else {
-        newPost.user = {}; // Handle case where user data can't be fetched
+        newPost.user = {};
       }
       setPosts((prevPosts) => [newPost, ...prevPosts]);
     }
@@ -68,8 +67,6 @@ const Home = () => {
       }
     }
   };
-
-  console.log("POSTS", posts);
 
   return (
     <ScreenWrapper bg="white">
